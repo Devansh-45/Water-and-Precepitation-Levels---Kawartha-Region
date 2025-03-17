@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+
+# Load and process Water Level (WL) data
+wl_MariposaBrook_1 = pd.read_csv('MariposaBrook-WL_1986-1995.csv')
+wl_MariposaBrook_1['Timestamp'] = pd.to_datetime(wl_MariposaBrook_1['Timestamp'], errors='coerce', infer_datetime_format=True)
+print(wl_MariposaBrook_1.info())
+wl_MariposaBrook_1.rename(columns={'Value': 'wl_value'}, inplace=True)
+wl_MariposaBrook_1.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+wl_MariposaBrook_1 = wl_MariposaBrook_1[wl_MariposaBrook_1['Timestamp']>='07/03/1986 7:00'] 
+print(wl_MariposaBrook_1.head(10))
+
+
+wl_MariposaBrook_2 = pd.read_csv('MariposaBrook-WL_1996-2005.csv')
+wl_MariposaBrook_2['Timestamp'] = pd.to_datetime(wl_MariposaBrook_2['Timestamp'], errors='coerce', infer_datetime_format=True)
+wl_MariposaBrook_2.rename(columns={'Value': 'wl_value'}, inplace=True)
+wl_MariposaBrook_2.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(wl_MariposaBrook_2.info())
+
+wl_MariposaBrook_3 = pd.read_csv('MariposaBrook-WL_2006-2015.csv')
+wl_MariposaBrook_3['Timestamp'] = pd.to_datetime(wl_MariposaBrook_3['Timestamp'], errors='coerce', infer_datetime_format=True)
+wl_MariposaBrook_3.rename(columns={'Value': 'wl_value'}, inplace=True)
+wl_MariposaBrook_3.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(wl_MariposaBrook_3.info())
+
+wl_MariposaBrook_4 = pd.read_csv('MariposaBrook-WL_2016-2024.csv')
+wl_MariposaBrook_4['Timestamp'] = pd.to_datetime(wl_MariposaBrook_4['Timestamp'], errors='coerce', infer_datetime_format=True)
+wl_MariposaBrook_4.rename(columns={'Value': 'wl_value'}, inplace=True)
+wl_MariposaBrook_4.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(wl_MariposaBrook_4.info())
+# Combine all WL data
+wl_MariposaBrook = pd.concat([wl_MariposaBrook_1, wl_MariposaBrook_2, wl_MariposaBrook_3, wl_MariposaBrook_4])
+
+# Load and process Precipitation (PP) data
+pp_MariposaBrook_1 = pd.read_csv('MariposaBrook-PP_1986-1995.csv')
+pp_MariposaBrook_1['Timestamp'] = pd.to_datetime(pp_MariposaBrook_1['Timestamp'], errors='coerce', infer_datetime_format=True)
+pp_MariposaBrook_1.rename(columns={'Value': 'pp_value'}, inplace=True)
+pp_MariposaBrook_1.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(pp_MariposaBrook_1.info())
+
+pp_MariposaBrook_2 = pd.read_csv('MariposaBrook-PP_1996-2005.csv')
+pp_MariposaBrook_2['Timestamp'] = pd.to_datetime(pp_MariposaBrook_2['Timestamp'], errors='coerce', infer_datetime_format=True)
+pp_MariposaBrook_2.rename(columns={'Value': 'pp_value'}, inplace=True)
+pp_MariposaBrook_2.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(pp_MariposaBrook_2.info())
+
+pp_MariposaBrook_3 = pd.read_csv('MariposaBrook-PP_2006-2015.csv')
+pp_MariposaBrook_3['Timestamp'] = pd.to_datetime(pp_MariposaBrook_3['Timestamp'], errors='coerce', infer_datetime_format=True)
+pp_MariposaBrook_3.rename(columns={'Value': 'pp_value'}, inplace=True)
+pp_MariposaBrook_3.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(pp_MariposaBrook_3.info())
+
+pp_MariposaBrook_4 = pd.read_csv('MariposaBrook-PP_2016-2024.csv')
+pp_MariposaBrook_4['Timestamp'] = pd.to_datetime(pp_MariposaBrook_4['Timestamp'], errors='coerce', infer_datetime_format=True)
+pp_MariposaBrook_4.rename(columns={'Value': 'pp_value'}, inplace=True)
+pp_MariposaBrook_4.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
+print(pp_MariposaBrook_4.info())
+
+# Combine all PP data
+pp_MariposaBrook = pd.concat([pp_MariposaBrook_1, pp_MariposaBrook_2, pp_MariposaBrook_3, pp_MariposaBrook_4])
+
+# Merge WL and PP data on Timestamp
+wl_pp_MariposaBrook = wl_MariposaBrook.merge(pp_MariposaBrook, how='inner', on='Timestamp')
+
+# Save to Excel
+wl_pp_MariposaBrook.to_excel('C:\\Users\\Sahil\\Desktop\\Trent\\Semester4\\wl_pp_MariposaBrook.xlsx', sheet_name='MariposaBrook', index=False)
