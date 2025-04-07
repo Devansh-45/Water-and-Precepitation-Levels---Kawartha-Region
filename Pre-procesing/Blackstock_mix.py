@@ -1,5 +1,18 @@
 import pandas as pd
 import numpy as np
+from numpy.ma.extras import unique
+
+def cross_correlation(df,x,y):
+    cross_corr = np.correlate(df['wl_value'] - np.mean(df['wl_value']),
+                              df['pp_value'] - np.mean(df['pp_value']), mode='full')
+    lags = np.arange(-len(df['wl_value']) + 1, len(df['pp_value']))
+    plt.plot(lags, cross_corr)
+    plt.xlim(x,y)
+    plt.xlabel("Lag")
+    plt.ylabel("Cross-Correlation")
+    plt.title("Cross-Correlation Function")
+    plt.show()
+
 
 # wl_blackstock = pd.read_csv('/Volumes/Devansh/BDA/Research Paper /2025-ULinks-Precipitation-WaterLevel-Data/Blackstock-WSC/Blackstock-WL_2006-2016.csv')
 #
@@ -102,8 +115,9 @@ import numpy as np
 # wl_MariposaBrook_1.rename(columns={'Value': 'wl_value'}, inplace=True)
 # wl_MariposaBrook_1.drop(columns=['ts_name', 'ts_id', 'Units', 'station_name', 'station_id'], inplace=True)
 # wl_MariposaBrook_1 = wl_MariposaBrook_1[wl_MariposaBrook_1['Timestamp']>='07/03/1986 7:00']
-# # print(wl_MariposaBrook_1.head(20))
-#
+# print(wl_MariposaBrook_1.isna().sum())
+# print(wl_MariposaBrook_1.head(20))
+
 #
 # wl_MariposaBrook_2 = pd.read_csv('/Volumes/Devansh/BDA/Research Paper /2025-ULinks-Precipitation-WaterLevel-Data/MariposaBrook-WSC/MariposaBrook-WL_1996-2005.csv')
 # wl_MariposaBrook_2['Timestamp'] = pd.to_datetime(wl_MariposaBrook_2['Timestamp'],format='mixed')
@@ -380,10 +394,12 @@ import numpy as np
 # MariposaBrook
 # MariposaBrook = pd.read_excel('/Volumes/Devansh/BDA/Research Paper /2025-ULinks-Precipitation-WaterLevel-Data/Pre-procesing/wl_pp.xlsx',sheet_name='MariposaBrook')
 #
-# print(MariposaBrook.head())
-#
+# # print(MariposaBrook.head())
+# # print(MariposaBrook.info())
 # print(MariposaBrook.isna().sum())
 # # Just 15 missing value in wl_value
+#
+# MariposaBrook['Timestamp'] = pd.to_datetime(MariposaBrook['Timestamp'])
 #
 # import matplotlib.pyplot as plt
 # # import missingno as msno
@@ -407,37 +423,44 @@ import numpy as np
 # MariposaBrook = MariposaBrook[~(MariposaBrook['wl_value']<=0)]
 # # print(MariposaBrook[MariposaBrook['wl_value']<=0])
 #
-# print((len(MariposaBrook[(MariposaBrook['pp_value']<0)])/len(MariposaBrook))*100)
+# print((len(MariposaBrook[(MariposaBrook['pp_value']<=0)])/len(MariposaBrook))*100)
 # # The rows with pp_value less than zero is less than 0.00021% so we can drop them
 #
-# MariposaBrook = MariposaBrook[~(MariposaBrook['pp_value']<0)]
-# # print(MariposaBrook[MariposaBrook['pp_value']<0])
+# MariposaBrook = MariposaBrook[~(MariposaBrook['pp_value']<=0)]
+# # print(MariposaBrook[MariposaBrook['pp_value']<=0])
+#
+# print("The length of the new dataset is now reduced from 465k to",len(MariposaBrook))
+#
+# print("Percentage of the Precipitation value equal to 0.2 in dataset",(len(MariposaBrook[(MariposaBrook['pp_value']==0.2)])/len(MariposaBrook))*100)
+# # MariposaBrook.to_excel('Temp.xlsx',sheet_name='Mariposa_new')
 #
 # # Wl value Analysis
 # # sns.set_theme(style='darkgrid',palette='flare')
 # # fig ,ax = plt.subplots(2,2)
-# # sns.scatterplot(data=MariposaBrook,x='Timestamp',y='wl_value',ax=ax[1,0])
+# # sns.scatterplot(data=MariposaBrook.loc['1992-07-17 20:00:00':'1997-07-17 12:00:00'],x='Timestamp',y='wl_value',ax=ax[1,0])
 # # ax[1,0].set_title('Scatter plot')
+# # ax[1,0].tick_params("x",rotation=90)
 # # sns.histplot(data=MariposaBrook,x='wl_value',ax=ax[0,0],kde=True)
 # # ax[0,0].set_title('Histogram')
 # # sns.boxenplot(x=MariposaBrook['wl_value'],ax=ax[0,1])
 # # ax[0,1].set_title('Boxen Plot')
-# # sns.lineplot(data=MariposaBrook['wl_value'],ax=ax[1,1])
+# # sns.lineplot(data=MariposaBrook['wl_value'].loc['1992-07-17 20:00:00':'1997-07-17 12:00:00'],ax=ax[1,1])
 # # ax[1,1].set_title('Line plot')
+# # ax[1,1].tick_params("x",rotation=90)
 # # fig.suptitle('Water level value Analysis for MariposaBrook',fontweight='bold',fontsize=16)
-# # plt.savefig('Wl_analysis')
+# # plt.show()
 #
 # # PP value Analysis
 # # sns.set_theme(style='darkgrid',palette='flare')
-# # fig ,ax = plt.subplots(2,2)
-# # sns.scatterplot(data=MariposaBrook,x='Timestamp',y='pp_value',ax=ax[1,0])
+# # fig ,ax = plt.subplots(2,2,figsize=(10,12))
+# # sns.scatterplot(data=MariposaBrook.loc['1992-07-17 20:00:00':'1997-07-17 12:00:00'],x='Timestamp',y='pp_value',ax=ax[1,0])
 # # ax[1,0].set_title('Scatter plot')
 # # ax[1,0].tick_params("x",rotation=90)
 # # sns.histplot(data=MariposaBrook,x='pp_value',ax=ax[0,0],kde=True)
 # # ax[0,0].set_title('Histogram')
 # # sns.boxenplot(x=MariposaBrook['pp_value'],ax=ax[0,1])
 # # ax[0,1].set_title('Boxen Plot')
-# # sns.lineplot(data=MariposaBrook['pp_value'],ax=ax[1,1])
+# # sns.lineplot(data=MariposaBrook['pp_value'].loc['1992-07-17 20:00:00':'1997-07-17 12:00:00'],ax=ax[1,1])
 # # ax[1,1].set_title('Line plot')
 # # ax[1,1].tick_params("x",rotation=90)
 # # fig.suptitle('Precipitation level value Analysis for MariposaBrook',fontweight='bold',fontsize=16)
@@ -451,9 +474,13 @@ import numpy as np
 #
 # # Correlation
 # from scipy.stats import pearsonr
+# from scipy.stats import spearmanr
 #
 # R,p = pearsonr(MariposaBrook['wl_value'],MariposaBrook['pp_value'])
 # print("Pearson Correlation value in percentage",R*100)
+#
+# R,p = spearmanr(MariposaBrook['wl_value'],MariposaBrook['pp_value'])
+# print("Spearman Correlation value in percentage",R*100)
 #
 # # Heatmap of the data
 # # sns.heatmap(MariposaBrook.corr(),annot=True,linewidth=.5,fmt=".1f")
@@ -485,73 +512,92 @@ import numpy as np
 # print(MariposaBrook['wl_value'].min())
 # print(MariposaBrook['wl_value'].max())
 #
-# # Need to scale the data as the min and max only have difference of (1.2 in wl and 2.2
-# # in pp)
+# # # Need to scale the data as the min and max only have difference of (1.2 in wl and 2.2
+# # # in pp)
 #
-# # Scaling the data
-# from sklearn.preprocessing import StandardScaler
 #
-# Scaler = StandardScaler()
-# MariposaBrook_scaled = Scaler.fit_transform(MariposaBrook)
+# # # Min-Max sampling
+# # from sklearn.preprocessing import MinMaxScaler
+# #
+# # min_max = MinMaxScaler(feature_range=(-1,1))
+# # MariposaBrook_minmax = min_max.fit_transform(MariposaBrook)
+# # print(type(MariposaBrook_minmax))
+# # MariposaBrook_minmax = pd.DataFrame(MariposaBrook_minmax)
+# # MariposaBrook_minmax['Timestamp']  = MariposaBrook.index
+# # print(MariposaBrook_minmax.head())
+# #
+# # MariposaBrook_minmax.rename(columns={0:'wl_value',1:'pp_value'},inplace=True)
+# # print(MariposaBrook_minmax.head())
+# #
+# # print(MariposaBrook_minmax.info())
+# # MariposaBrook_minmax.set_index('Timestamp',inplace=True)
 #
-# print(type(MariposaBrook_scaled))
-# MariposaBrook_scaled = pd.DataFrame(MariposaBrook_scaled)
-# MariposaBrook_scaled['Timestamp']  = MariposaBrook.index
-# print(MariposaBrook_scaled.head())
+# # We don't need min_max scaling as our data is going to go under normalization method
 #
-# MariposaBrook_scaled.rename(columns={0:'wl_value',1:'pp_value'},inplace=True)
-# print(MariposaBrook_scaled.head())
-# MariposaBrook_scaled.set_index('Timestamp',inplace=True)
+# MariposaBrook_minmax = MariposaBrook
 #
-# # Min-Max sampling
-# from sklearn.preprocessing import MinMaxScaler
+# # The precipitation data after min-max scaling still follows the unusual distribution,
+# # need to try some normalization method to scale the pp_value and remove minmax
+# # Now, we have already used min-max scaling from (-1,1), so we can't use log, square root
+# # and Box-cox transformation the options left are ye0-johnson, zscore and Quantile Transformation
+# # We are gonna use yeo-johnson on wl_value because our data is approx normal
+# # And Quantile transform for the pp_value because it is extreme case.
+# ## As, I have remove min max I can try to use log,sqrt and box-cox
+# from sklearn.preprocessing import PowerTransformer
 #
-# min_max = MinMaxScaler(feature_range=(-1,1))
-# MariposaBrook_minmax = min_max.fit_transform(MariposaBrook_scaled)
-# print(type(MariposaBrook_minmax))
-# MariposaBrook_minmax = pd.DataFrame(MariposaBrook_minmax)
-# MariposaBrook_minmax['Timestamp']  = MariposaBrook.index
-# print(MariposaBrook_minmax.head())
+# pt = PowerTransformer()
 #
-# MariposaBrook_minmax.rename(columns={0:'wl_value',1:'pp_value'},inplace=True)
-# print(MariposaBrook_minmax.head())
-# MariposaBrook_minmax.set_index('Timestamp',inplace=True)
+# MariposaBrook_minmax['wl_value'] = pt.fit_transform(MariposaBrook_minmax['wl_value'].values.reshape(-1,1))
 #
 # # Wl value Analysis after data preprocessing
 # # sns.set_theme(style='darkgrid',palette='flare')
 # # fig ,ax = plt.subplots(2,2)
-# # sns.scatterplot(data=MariposaBrook_minmax.loc['1986-07-03 07:00:00':'2018-01-01 00:00:00'],x='Timestamp',y='wl_value',ax=ax[1,0])
+# # sns.scatterplot(data=MariposaBrook_minmax.loc['1988-07-17 20:00:00':'1992-07-17 12:00:00'],x='Timestamp',y='wl_value',ax=ax[1,0])
 # # ax[1,0].set_title('Scatter plot')
 # # ax[1,0].tick_params("x",rotation=90)
 # # sns.histplot(data=MariposaBrook_minmax,x='wl_value',ax=ax[0,0],kde=True)
 # # ax[0,0].set_title('Histogram')
 # # sns.boxenplot(x=MariposaBrook_minmax['wl_value'],ax=ax[0,1])
 # # ax[0,1].set_title('Boxen Plot')
-# # sns.lineplot(data=MariposaBrook_minmax['wl_value'].loc['1986-07-03 07:00:00':'2018-01-01 00:00:00'],ax=ax[1,1])
+# # sns.lineplot(data=MariposaBrook_minmax['wl_value'].loc['1988-07-17 20:00:00':'1992-07-17 12:00:00'],ax=ax[1,1])
 # # ax[1,1].set_title('Line plot')
 # # ax[1,1].tick_params("x",rotation=90)
 # # fig.suptitle('Water level value Analysis for MariposaBrook after Data Preprocessing',fontweight='bold',fontsize=16)
 # # plt.show()
 #
-# # PP value Analysis after data preprocessing
+# # Precipitation Transformation
+# from sklearn.preprocessing import QuantileTransformer
+#
+# print(pd.unique(MariposaBrook_minmax.index.year))
+# unique_years = len(pd.unique(MariposaBrook_minmax.index.year))
+# qt = QuantileTransformer(n_quantiles=unique_years,random_state=42,output_distribution='normal')
+#
+# MariposaBrook_minmax['pp_value'] = qt.fit_transform(MariposaBrook['pp_value'].values.reshape(-1,1))
+#
+#
+# # # PP value Analysis after data preprocessing
 # # sns.set_theme(style='darkgrid',palette='flare')
 # # fig ,ax = plt.subplots(2,2)
-# # sns.scatterplot(data=MariposaBrook_minmax.loc['1986-07-03 07:00:00':'2018-01-31 00:00:00'],x='Timestamp',y='pp_value',ax=ax[1,0])
+# # sns.scatterplot(data=MariposaBrook_minmax.loc['1988-07-17 20:00:00':'1992-07-17 12:00:00'],x='Timestamp',y='pp_value',ax=ax[1,0])
 # # ax[1,0].set_title('Scatter plot')
 # # ax[1,0].tick_params("x",rotation=90)
 # # sns.histplot(data=MariposaBrook_minmax,x='pp_value',ax=ax[0,0],kde=True)
 # # ax[0,0].set_title('Histogram')
 # # sns.boxenplot(x=MariposaBrook_minmax['pp_value'],ax=ax[0,1])
 # # ax[0,1].set_title('Boxen Plot')
-# # sns.lineplot(data=MariposaBrook_minmax['pp_value'].loc['1986-07-03 07:00:00':'2018-01-31 00:00:00'],ax=ax[1,1])
+# # sns.lineplot(data=MariposaBrook_minmax['pp_value'].loc['1988-07-17 20:00:00':'1992-07-17 12:00:00'],ax=ax[1,1])
 # # ax[1,1].set_title('Line plot')
 # # ax[1,1].tick_params("x",rotation=90)
 # # fig.suptitle('Precipitation level value Analysis for MariposaBrook after Data Preprocessing',fontweight='bold',fontsize=16)
 # # plt.show()
 #
+#
 # R,p = pearsonr(MariposaBrook_minmax['wl_value'],MariposaBrook_minmax['pp_value'])
 # print(MariposaBrook_minmax.corr())
 # print("Pearson Correlation value in percentage",R*100)
+# #
+# R,p = spearmanr(MariposaBrook_minmax['wl_value'],MariposaBrook_minmax['pp_value'])
+# print("Spearman Correlation value in percentage",R*100)
 #
 # # Heatmap of the data
 # # sns.heatmap(MariposaBrook_minmax.corr(),annot=True,linewidth=.5,fmt=".1f")
@@ -563,12 +609,13 @@ import numpy as np
 # # sns.scatterplot(data=MariposaBrook_minmax,x='wl_value',y='pp_value')
 # # plt.title('Wl vs Precipitation value')
 # # plt.show()
-#
-# # There is no linear dependency in data which is clearly visual from the graph and also
-# # from the correlation matrix and pearson value, so we need to find non-linear dependancy.
+# #
+# # # There is no linear dependency in data which is clearly visual from the graph and also
+# # # from the correlation matrix and pearson value, so we need to find non-linear dependancy.
 # from sklearn.feature_selection import mutual_info_regression
-# mi = mutual_info_regression(MariposaBrook_minmax[['pp_value']], MariposaBrook_minmax['wl_value'])
+# mi = mutual_info_regression(MariposaBrook_minmax[['pp_value']], MariposaBrook_minmax['wl_value'],random_state=42)
 # print(f'Mutual Information: {mi[0]}')
+
 
 # PigeonRiver Lotus
 
@@ -673,7 +720,6 @@ print(PigeonRiverLotus['pp_value'].max())
 print('WL_value after outlier removal')
 print(PigeonRiverLotus['wl_value'].min())
 print(PigeonRiverLotus['wl_value'].max())
-
 # Need to scale the data as the min and max only have difference of (1.2 in wl and 2.2
 # in pp)
 
@@ -693,18 +739,19 @@ print(PigeonRiverLotus_scaled.head())
 PigeonRiverLotus_scaled.set_index('Timestamp',inplace=True)
 
 # Min-Max sampling
-from sklearn.preprocessing import MinMaxScaler
-
-min_max = MinMaxScaler(feature_range=(-1,1))
-PigeonRiverLotus_minmax = min_max.fit_transform(PigeonRiverLotus_scaled)
-print(type(PigeonRiverLotus_minmax))
-PigeonRiverLotus_minmax = pd.DataFrame(PigeonRiverLotus_minmax)
-PigeonRiverLotus_minmax['Timestamp']  = PigeonRiverLotus.index
-print(PigeonRiverLotus_minmax.head())
-
-PigeonRiverLotus_minmax.rename(columns={0:'wl_value',1:'pp_value'},inplace=True)
-print(PigeonRiverLotus_minmax.head())
-PigeonRiverLotus_minmax.set_index('Timestamp',inplace=True)
+PigeonRiverLotus_minmax = PigeonRiverLotus
+# from sklearn.preprocessing import MinMaxScaler
+#
+# min_max = MinMaxScaler(feature_range=(-1,1))
+# PigeonRiverLotus_minmax = min_max.fit_transform(PigeonRiverLotus_scaled)
+# print(type(PigeonRiverLotus_minmax))
+# PigeonRiverLotus_minmax = pd.DataFrame(PigeonRiverLotus_minmax)
+# PigeonRiverLotus_minmax['Timestamp']  = PigeonRiverLotus.index
+# print(PigeonRiverLotus_minmax.head())
+#
+# PigeonRiverLotus_minmax.rename(columns={0:'wl_value',1:'pp_value'},inplace=True)
+# print(PigeonRiverLotus_minmax.head())
+# PigeonRiverLotus_minmax.set_index('Timestamp',inplace=True)
 
 # Wl value Analysis after data preprocessing
 # sns.set_theme(style='darkgrid',palette='flare')
@@ -738,7 +785,9 @@ PigeonRiverLotus_minmax.set_index('Timestamp',inplace=True)
 # fig.suptitle('Precipitation level value Analysis for Pigeon River Lotus after Data Preprocessing',fontweight='bold',fontsize=16)
 # plt.show()
 
-R,p = pearsonr(PigeonRiverLotus_minmax['wl_value'],PigeonRiverLotus_minmax['pp_value'])
+cross_correlation(PigeonRiverLotus_minmax,2800,2900)
+
+R,p = pearsonr(PigeonRiverLotus_minmax['wl_value'],PigeonRiverLotus_minmax['pp_value'].shift(periods=2890,fill_value=0))
 print(PigeonRiverLotus_minmax.corr())
 print("Pearson Correlation value in percentage",R*100)
 
@@ -756,7 +805,7 @@ print("Pearson Correlation value in percentage",R*100)
 # There is no linear dependency in data which is clearly visual from the graph and also
 # from the correlation matrix and pearson value, so we need to find non-linear dependancy.
 from sklearn.feature_selection import mutual_info_regression
-mi = mutual_info_regression(PigeonRiverLotus_minmax[['wl_value']], PigeonRiverLotus_minmax['pp_value'])
+mi = mutual_info_regression(PigeonRiverLotus_minmax[['wl_value']], PigeonRiverLotus_minmax['pp_value'].shift(periods=2890,fill_value=0))
 print(f'Mutual Information: {mi[0]}')
 
 
